@@ -224,6 +224,13 @@ During training, the model will save the best checkpoint to the location provide
 
 A pre-trained Faster R-CNN model checkpoint is provided in `bdd100k_fastrcnn_model.pth`. You can use this checkpoint for inference or further fine-tuning.
 
+## Download Pretrained Weights
+
+You can download the pretrained weights from the following Google Drive link used for inference
+
+[Download Weights](https://drive.google.com/file/d/1unGDXexkPYNHD5O1zITsvdfylOiNUrrx/view?usp=sharing)
+
+
 ## Evaluation
 
 The `metrics.py` is script for evaluating the trained Faster RCNN model. The script runs inference on a set of validation images, compares the predictions to the ground truth annotations, and computes precision, recall, and F1-score metrics for each class, as well as overall metrics across all classes.
