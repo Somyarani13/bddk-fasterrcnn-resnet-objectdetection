@@ -200,13 +200,19 @@ The main script for training is `main.py`. It allows you to configure the traini
 
 To train the model, run the following command from the root directory:
 
+cd faster_rcnn_training
+go to model_config.py in faster_rcnn_training/config/model_config.py
+edit path for "img_dir" and "label_dir"
+Note:- For custom training - the model will be loaded in cpu.
+
 ```bash
+
 python main.py \
     --path_to_model_config ./config/model_config.py \
     --path_to_save_trained_model ./output/fasterrcnn_model.pth \
     --path_to_train_dir .assignment_data_bdd/bdd100k_images_100k \
     --path_to_train_json ./assignment_data_bdd/bdd100k_labels_release/bdd100k_labels_images_train.json \
-    --device cuda
+    --device cpu
 ```
 ### Arguments
 

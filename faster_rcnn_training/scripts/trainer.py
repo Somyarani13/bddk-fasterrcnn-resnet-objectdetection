@@ -93,7 +93,7 @@ def train(config, bdd_objects, model_save_path):
     train_model_flag =  config.config['train']
     train_images =  config.config['train_images']
     device =config.config['device']
-    val_images =  config['val_images']
+    val_images =  config.config['val_images']
 
     train_transform = T.Compose([T.ToTensor()])
     num_classes = len(bdd_objects)
