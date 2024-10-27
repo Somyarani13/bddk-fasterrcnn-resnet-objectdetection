@@ -133,6 +133,6 @@ def train(config, bdd_objects, model_save_path):
         for epoch in range(epochs):
             t_loss = trainer.train()
             print(f"Epoch {epoch+1}/{epochs}, Train Loss: {t_loss:.4f}")
-        torch.save(model.state_dict(), os.path.join(model_save_path, f'model_epoch_{epoch+1}.pth'))
+        torch.save(model.state_dict(), os.path.join(model_save_path, f'fasterrcnn_model.pth'))
 
         print("Training and evaluation completed.")

@@ -28,7 +28,7 @@ if __name__ == '__main__':
     path_to_save_trained_model = args.path_to_save_trained_model
     path_to_train_dir = args.path_to_train_dir
     path_to_train_json = args.path_to_train_json
-    output_folder = args.output_folder
+    # output_folder = args.output_folder
     device = args.device
 
     model_name = 'fasterrcnn_resnet50_fpn'                    # Hardcoded model name.

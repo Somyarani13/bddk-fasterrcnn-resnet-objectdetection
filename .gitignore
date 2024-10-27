@@ -4,3 +4,4 @@ __pycache__/
 yolo_training_failed/yolov8n.pt
 inference_gt_app/configs/fast_rcnn_bdd100/faster_rcnn_r50_fpn_1x_det_bdd100k.pth
 faster_rcnn_training/bdd100k_fastrcnn_model.pth
+inference_gt_app/gt_inference_results/*

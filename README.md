@@ -1,17 +1,17 @@
 # BDD100K Dataset Analysis, Model Training and Inferencing
 
 # Part1: Streamlit App for Data Processing overview
-This project provides a **Streamlit web application** to perform **data analysis on the BDD100K dataset**. It helps visualize the dataset with **bar charts, histograms, and annotated images** showing object detection labels. The app allows users to:
+This part of the project provides a **Streamlit web application** to perform **data analysis on the BDD100K dataset**. It helps visualize the dataset with **bar charts, histograms, and annotated images** showing object detection labels. The app allows users to:
 
 - Analyze **train and validation datasets** (e.g., class distribution, weather, scene conditions).
 - Visualize **unique/interesting samples** by drawing bounding boxes on images.
 - Provide **conclusions and recommendations** for model training.
 
-The project is containerized using **Docker** to ensure easy deployment and consistent runtime environments.
+The app is containerized using **Docker** to ensure easy deployment and consistent runtime environments.
 
 ---
 
-## App Folder Structure
+## Streamlit App Folder Structure
 Make sure the **data is mounted correctly** during runtime. Below is the **expected folder structure** for your data and project files:
 
 ```bash
@@ -26,7 +26,7 @@ Make sure the **data is mounted correctly** during runtime. Below is the **expec
 │       ├── bdd100k_labels_images_train.json
 │       └── bdd100k_labels_images_val.json
 │
-├── scripts/                                # Contains app and scripts            
+├── scripts/                                # Contains app and scripts
 │   └── data_analysis.py                    # (Optional) Additional scripts
 │
 ├── app.py                                  # Streamlit app code
@@ -48,7 +48,7 @@ Ensure you have **Docker** installed on your machine. If not, follow the officia
 In the **root directory** (where your **Dockerfile** is located), run the following command to **build the Docker image**:
 
 ```bash
-docker build -t streamlit-bdd-app .
+sudo docker build -t streamlit-bdd-app .
 ```
 
 ## How to Run the App
@@ -58,7 +58,7 @@ Use the following command to **run the Docker container** and **mount your datas
 
 ```bash
 docker run -p 8501:8501 -v $(pwd)/assignment_data_bdd:/mnt/data streamlit-bdd-app
- ```   
+ ```
 #### Explanation:
 - **`-p 8501:8501`**: Maps **port 8501** inside the container to **port 8501** on your local machine.
 - **`-v $(pwd)/assignment_data_bdd:/mnt/data`**: Mounts your **local data directory** to `/mnt/data` inside the container.
@@ -67,7 +67,7 @@ docker run -p 8501:8501 -v $(pwd)/assignment_data_bdd:/mnt/data streamlit-bdd-ap
 After running the Docker container, open your browser and go to:
 ```bash
 http://localhost:8501
- ```  
+ ```
 
 ## How to Use the App
 
@@ -93,6 +93,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 ```
+
+### **Error: `permission denied while trying to connect to the Docker daemon socket`**
+This is caused by Docker user not added. Add `sudo`, in all the docker commands.
 
 ### **Cannot Access App**
 - Ensure **Docker** is running and the **correct port (8501)** is mapped.
@@ -149,11 +152,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 - **Integration with Other Models:** Can be extended to Mask R-CNN for instance segmentation or integrated with attention mechanisms for improved performance.
 - **Future-Proof:** Its foundational architecture makes it compatible with ongoing advancements in object detection research.
 
-### 7. Comprehensive Feature Representation
-
-- **Deep Feature Extraction:** Employs powerful backbone networks that capture rich visual features, leading to better recognition of subtle object details.
-- **Multi-Layer Processing:** Combines features from multiple convolutional layers to improve detection of both small and large objects.
-
 ---
 
 # Faster R-CNN Training and Evaluation
@@ -175,7 +173,6 @@ This section contains code for training a Faster R-CNN model on the BDD100K data
 │
 ├── __init__.py                     # Makes the scripts folder a Python package
 ├── metrics.py                      # Script to calculate evaluation metrics
-├── bdd100k_fastrcnn_model.pth      # Pre-trained model checkpoint
 └── main.py                         # Main entry point to start the training process
 ```
 
@@ -186,30 +183,26 @@ Before starting the training, make sure you have the following dependencies inst
 - **Python 3.8**
 - MMCV and MMDetection
 - PyTorch (if using GPU, ensure that CUDA is properly configured)
-- NumPy
+- Streamlit
 
 You can install the dependencies using the following command:
 
 ```bash
-pip install -r requirements.txt
+conda create -n faster_rcnn python=3.8
+conda activate faster_rcnn
+
+# Now install the packages
+pip install -r requirements-faster-rcnn.txt
 ```
 
 ## Training the Model
 
-The main script for training is `main.py`. It allows you to configure the training process using various arguments.
-
-To train the model, run the following command from the root directory:
-
-cd faster_rcnn_training
-go to model_config.py in faster_rcnn_training/config/model_config.py
-edit path for "img_dir" and "label_dir"
-Note:- For custom training - the model will be loaded in cpu.
+The main script for training is `main.py`. It allows you to configure the training process using various arguments. **Note:- For custom training - the model will be loaded in cpu.** To train the model, run the following command from the project root directory:
 
 ```bash
-
-python main.py \
+python faster_rcnn_training/main.py \
     --path_to_model_config ./config/model_config.py \
-    --path_to_save_trained_model ./output/fasterrcnn_model.pth \
+    --path_to_save_trained_model fasterrcnn_model_weights \
     --path_to_train_dir .assignment_data_bdd/bdd100k_images_100k \
     --path_to_train_json ./assignment_data_bdd/bdd100k_labels_release/bdd100k_labels_images_train.json \
     --device cpu
@@ -226,20 +219,21 @@ python main.py \
 
 During training, the model will save the best checkpoint to the location provided by `--path_to_save_trained_model`.
 
-### Pre-trained Model
+### Download Pre-trained Model Weights
 
-A pre-trained Faster R-CNN model checkpoint is provided in `bdd100k_fastrcnn_model.pth`. You can use this checkpoint for inference or further fine-tuning.
+You can download the pretrained Faster RCNN weights from the following Google Drive link used for inference:
+You can use this checkpoint for inference or further fine-tuning.
 
-## Download Pretrained Weights
-
-You can download the pretrained weights from the following Google Drive link used for inference
-
-[Download Weights](https://drive.google.com/file/d/1unGDXexkPYNHD5O1zITsvdfylOiNUrrx/view?usp=sharing)
-
+**[Download Pre-Trained Weights](https://drive.google.com/file/d/1unGDXexkPYNHD5O1zITsvdfylOiNUrrx/view)**
+#### NOTE: Folder path to keep the downloaded weights- `./inference_gt_app/configs/fast_rcnn_bdd100/`
 
 ## Evaluation
 
 The `metrics.py` is script for evaluating the trained Faster RCNN model. The script runs inference on a set of validation images, compares the predictions to the ground truth annotations, and computes precision, recall, and F1-score metrics for each class, as well as overall metrics across all classes.
+
+```bash
+python faster_rcnn_training/metrics.py
+```
 
 ### Features
 - **Class-wise metrics**: Precision, recall, and F1-score for each object class in the dataset.
@@ -252,7 +246,7 @@ The `metrics.py` is script for evaluating the trained Faster RCNN model. The scr
 ---
 # YOLO Training (Failed Attempt)
 
-This folder contains an attempt to train a YOLOv8 model on the BDD100K dataset. Unfortunately, the training failed due to issues with the custom dataloader. Here is a brief overview of the folder structure and files included in the project.
+This folder contains an attempt to train a YOLOv8 model on the BDD100K dataset. Unfortunately, the training failed due to issues with the Custom Dataloader. Here is a brief overview of the folder structure and files included in the project.
 
 ## Yolo Training Folder Structure
 ```bash
@@ -264,6 +258,7 @@ This folder contains an attempt to train a YOLOv8 model on the BDD100K dataset. 
 ├── json_to_yolo_format.py      # Script to convert JSON annotations to YOLO format
 ├── test_dataloader.py          # Script for testing the dataloader functionality
 ├── train_yolo.py               # Main script to train YOLOv8 on the dataset
+│
 └── yolov8n.pt                  # Pretrained YOLOv8n model weights
 ```
 ## Issues
@@ -294,7 +289,7 @@ The `bdd100k.yaml` file contains the configuration for the YOLOv8 model training
 
 # Part3: BDD100K Faster R-CNN Inference & GT/Pred Viewer, and Observations
 
-Streamlit-based tool for visualizing the inference results of a Faster R-CNN model trained on the BDD100K dataset. The app allows users to upload an image and visualize both the inference results and the ground truth (GT) annotations (for validation images). The inference results are obtained using the Faster R-CNN model, and ground truth annotations are overlaid for images in the validation set.
+Streamlit-based tool for visualizing the inference results of a Faster R-CNN model trained on the BDD100K dataset. The app allows users to upload an image and visualize both the inference results and the ground truth (GT) annotations (for validation images). The inference results are obtained using the Faster R-CNN model, and ground truth annotations are drawn for images in the validation set.
 
 ## Inference Folder Structure
 Below is the **expected folder structure** for your data and project files:
@@ -305,38 +300,27 @@ Below is the **expected folder structure** for your data and project files:
 │   ├── _base_
 │   │   ├── datasets
 │   │   │   └── bdd100k.py     # Dataset configuration for BDD100K
+│   │   │
 │   │   ├── models
 │   │   │   └── faster_rcnn_r50_fpn.py   # Model configuration
+│   │   │
 │   │   ├── schedules
-│   │   │   ├── schedule_1x.py           # Training schedule
-│   │   ├── default_runtime.py           # Runtime configuration
-├── fast_rcnn_bdd100            # Contains trained model checkpoints for Faster R-CNN
-│   ├── faster_rcnn_r50_fpn_1x_det_bdd100k.py    # Config for inference
-│   └── faster_rcnn_r50_fpn_1x_det_bdd100k.pth   # Model checkpoint
+│   │   │   └──schedule_1x.py            # Training schedule
+│   │   │
+│   │   └── default_runtime.py           # Runtime configuration
+│   │
+│   └──fast_rcnn_bdd100            # Contains trained model checkpoints for Faster R-CNN
+│        ├── faster_rcnn_r50_fpn_1x_det_bdd100k.py    # Config for inference
+│        └── faster_rcnn_r50_fpn_1x_det_bdd100k.pth   # Model checkpoint
+│
 ├── gt_inference_results        # Output folder for generated inference + GT images
 ├── __init__.py
+│
 ├── app_gt_inference_viewer.py  # Streamlit application for inference and GT visualization
 ├── single_image_test.py        # Standalone test script for running inference on a single image
+│
 ├── test_image_output.jpg       # Example output image
 └── test_image.jpg              # Example input image
-```
-
-## Prerequisites
-
-Before running the app, make sure you have the following dependencies installed:
-
-- **Python 3.8**
-- Streamlit
-- MMCV and MMDetection
-- PyTorch (if using GPU, ensure that CUDA is properly configured)
-- NumPy
-
-**NOTE:** The setup is done for CPU based Inference.
-
-You can install the dependencies using the following command:
-
-```bash
-pip install -r requirements.txt
 ```
 
 ## Usage
@@ -344,7 +328,7 @@ pip install -r requirements.txt
 ### Running the Streamlit App
 1. To run the Streamlit app and view the inference results:
    ```bash
-   streamlit run gt_inference_results/app_gt_inference_viewer.py
+   streamlit run inference_gt_app/app_gt_inference_viewer.py
    ```
 2. In the browser, upload an image to perform inference. The app will display the inference results, and if the image is from the validation set, it will also display the ground truth annotations.
 
@@ -354,7 +338,7 @@ You can also run inference on a single image without the Streamlit UI by using t
 You can provide paths to input and output image in the script.
 
 ```bash
-python gt_inference_results/single_image_test.py 
+python inference_gt_app/single_image_test.py
 ```
 ### Output
 

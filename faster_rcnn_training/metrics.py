@@ -114,7 +114,7 @@ def parse_annotations(json_data, img_name):
         if annotation['name'] == img_name:
             for label in annotation['labels']:
                 if 'box2d' in label:
-                    
+
                     box = label['box2d']
                     category = label['category']
                     if category in category_to_class_index:
@@ -122,7 +122,7 @@ def parse_annotations(json_data, img_name):
                         gt_labels.append(category_to_class_index[category])  # passing category to above dict
                     else:
                         print(f"Warning: Category {category} not in mapping")
-    
+
     return gt_boxes, gt_labels
 
 # Load validation dataset
@@ -134,7 +134,7 @@ def evaluate_on_dataset(val_images_path, val_annotations_path, prob_threshold=0.
         val_annotations = json.load(f)
 
     # Loop through the validation images and annotations
-    for img_name in os.listdir(val_images_path):  # Evaluate first 10 images
+    for img_name in os.listdir(val_images_path)[:10]: #Evaluate first 10 images
         img_path = os.path.join(val_images_path, img_name)
 
         img = mmcv.imread(img_path)
@@ -150,7 +150,7 @@ def evaluate_on_dataset(val_images_path, val_annotations_path, prob_threshold=0.
                     pred_boxes.append(bbox[:4])
                     pred_labels.append(class_idx)  # Class index
                     pred_scores.append(bbox[4])
-        
+
         gt_boxes, gt_labels = parse_annotations(val_annotations, img_name)
 
         # print(f"Predicted labels for {img_name}: {pred_labels}")
@@ -167,7 +167,7 @@ def evaluate_on_dataset(val_images_path, val_annotations_path, prob_threshold=0.
 
     # Class Level results
     precision_dict, recall_dict, f1_dict = calculate_metrics(all_tp, all_fp, all_fn)
-    
+
     overall_precision, overall_recall, overall_f1 = calculate_overall_metrics(all_tp, all_fp, all_fn)
     return overall_precision, overall_recall, overall_f1
 
