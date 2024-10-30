@@ -27,7 +27,7 @@ def draw_annotations(image_path, labels):
             # Draw rectangle
             cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
             # Put class label
-            cv2.putText(image, category, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 
+            cv2.putText(image, category, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX,
                         0.5, (0, 255, 0), 1, cv2.LINE_AA)
 
     # Convert BGR image to RGB for Streamlit display
@@ -58,6 +58,10 @@ def parse_annotations(data):
     timeofday_counts = defaultdict(int)
     boxes_per_image = []
 
+    # Additional counters for occlusion and truncation
+    occlusion_counts = defaultdict(int)
+    truncation_counts = defaultdict(int)
+
     for image_data in data:
         labels = image_data.get('labels', [])
         boxes_per_image.append(len(labels))  # Number of objects per image
@@ -84,14 +88,42 @@ def parse_annotations(data):
                 area = width * height
                 box_areas[category].append(area)
 
+            # Count occluded and truncated attributes
+            occluded = label.get("attributes", {}).get("occluded", False)
+            truncation = label.get("attributes", {}).get("truncated", False)
+            occlusion_counts[occluded] += 1
+            truncation_counts[truncation] += 1
+
     return {
         "class_counts": class_counts,
         "box_areas": box_areas,
         "weather_counts": weather_counts,
         "scene_counts": scene_counts,
         "timeofday_counts": timeofday_counts,
-        "boxes_per_image": boxes_per_image
+        "boxes_per_image": boxes_per_image,
+        "occlusion_counts": occlusion_counts,
+        "truncation_counts": truncation_counts
     }
+
+
+def visualize_attribute_distribution(attribute_counts, title, dataset_name):
+    """Create and display a bar chart for attribute distribution in Streamlit."""
+    labels = ['False', 'True']
+    values = [attribute_counts[False], attribute_counts[True]]
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.bar(labels, values, color='skyblue', edgecolor='black')
+    ax.set_title(f"{title} in {dataset_name} Set")
+    ax.set_xlabel("Attribute Value")
+    ax.set_ylabel("Object Count")
+
+    # Display percentages on top of bars
+    total = sum(values)
+    for i, value in enumerate(values):
+        percentage = f"{(value / total) * 100:.2f}%"
+        ax.text(i, value + total * 0.01, percentage, ha='center', va='bottom')
+
+    st.pyplot(fig)
 
 def add_percentage_labels(ax):
     """Add percentage labels on top of the bars in a bar chart."""
@@ -100,9 +132,9 @@ def add_percentage_labels(ax):
         height = p.get_height()
         if height > 0:
             percentage = f"{(height / total) * 100:.2f}%"
-            ax.annotate(percentage, 
+            ax.annotate(percentage,
                         (p.get_x() + p.get_width() / 2., height),
-                        ha='center', va='center', 
+                        ha='center', va='center',
                         xytext=(0, 9), textcoords='offset points')
 
 def visualize_bar(data_dict, title, xlabel, ylabel):
@@ -140,9 +172,9 @@ def visualize_class_area_distribution(box_areas):
     for class_name, areas in box_areas.items():
         st.subheader(f"Bounding Box Area Distribution for {class_name} - Train Set")
         visualize_hist(
-            areas, 
-            f"Bounding Box Area Distribution for {class_name}", 
-            "Area", "Frequency", 
+            areas,
+            f"Bounding Box Area Distribution for {class_name}",
+            "Area", "Frequency",
             bins=30
         )
 
@@ -177,7 +209,7 @@ def display_conclusions():
 
     ### 4. Objects Per Image and Model Efficiency
     - Some images contain **many objects** (e.g., crowded traffic), which can increase the complexity of detection.
-    - **Impact**: 
+    - **Impact**:
         - Crowded scenes could lead to overlapping bounding boxes, resulting in **label noise** and poor model performance.
         - Models may also take longer to train and infer due to more objects per image.
     - **Solution**:
@@ -223,29 +255,37 @@ def run_analysis(file_path, dataset_name):
     analysis = parse_annotations(data)
 
     st.subheader(f"Class Distribution - {dataset_name} Set")
-    visualize_bar(analysis["class_counts"], 
-                  f"Class Distribution in {dataset_name} Set", 
-                  "Class", "Object Count")
+    visualize_bar(analysis["class_counts"],
+                f"Class Distribution in {dataset_name} Set",
+                "Class", "Object Count")
 
     st.subheader(f"Weather Distribution - {dataset_name} Set")
-    visualize_bar(analysis["weather_counts"], 
-                  f"Weather Distribution in {dataset_name} Set", 
-                  "Weather", "Image Count")
+    visualize_bar(analysis["weather_counts"],
+                f"Weather Distribution in {dataset_name} Set",
+                "Weather", "Image Count")
 
     st.subheader(f"Scene Distribution - {dataset_name} Set")
-    visualize_bar(analysis["scene_counts"], 
-                  f"Scene Distribution in {dataset_name} Set", 
-                  "Scene", "Image Count")
+    visualize_bar(analysis["scene_counts"],
+                f"Scene Distribution in {dataset_name} Set",
+                "Scene", "Image Count")
 
     st.subheader(f"Time of Day Distribution - {dataset_name} Set")
-    visualize_bar(analysis["timeofday_counts"], 
-                  f"Time of Day Distribution in {dataset_name} Set", 
-                  "Time of Day", "Image Count")
+    visualize_bar(analysis["timeofday_counts"],
+                f"Time of Day Distribution in {dataset_name} Set",
+                "Time of Day", "Image Count")
 
     st.subheader(f"Objects per Image - {dataset_name} Set")
-    visualize_hist(analysis["boxes_per_image"], 
-                   f"Objects per Image in {dataset_name} Set", 
-                   "Number of Objects", "Frequency")
+    visualize_hist(analysis["boxes_per_image"],
+                f"Objects per Image in {dataset_name} Set",
+                "Number of Objects", "Frequency")
+
+    # Additional visualizations for occlusion and truncation
+    st.subheader(f"Occlusion Distribution - {dataset_name} Set")
+    visualize_attribute_distribution(analysis["occlusion_counts"], "Occlusion", dataset_name)
+
+    st.subheader(f"Truncation Distribution - {dataset_name} Set")
+    visualize_attribute_distribution(analysis["truncation_counts"], "Truncation", dataset_name)
+
 
 def main():
     st.title("BDD100K Dataset Analysis")

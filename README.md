@@ -27,7 +27,8 @@ Make sure the **data is mounted correctly** during runtime. Below is the **expec
 │       └── bdd100k_labels_images_val.json
 │
 ├── scripts/                                # Contains app and scripts
-│   └── data_analysis.py                    # (Optional) Additional scripts
+│   ├── data_analysis.py                    # (Optional) Additional scripts
+│   └── single_image_annotation.py          # To draw annotations of single image
 │
 ├── app.py                                  # Streamlit app code
 ├──  requirements.txt                       # Python dependencies
@@ -57,7 +58,7 @@ sudo docker build -t streamlit-bdd-app .
 Use the following command to **run the Docker container** and **mount your dataset directory correctly**:
 
 ```bash
-docker run -p 8501:8501 -v $(pwd)/assignment_data_bdd:/mnt/data streamlit-bdd-app
+sudo docker run -p 8501:8501 -v $(pwd)/assignment_data_bdd:/mnt/data streamlit-bdd-app
  ```
 #### Explanation:
 - **`-p 8501:8501`**: Maps **port 8501** inside the container to **port 8501** on your local machine.
